@@ -13,13 +13,6 @@ def connection_time_dissector(btsnoop_path, packet_summary=False):
 
   This function reads the Bluetooth snoop log and parse the log with
   connectivity events. The event start/finish time is returned in dict format.
-  As of now, the connectivity events are:
-    - ACL
-    - A2Dp
-    - HFP
-    - AVRCP
-    - RFCOMM channel 20 (for AGSA data connection)
-    - RFCOMM channel 21 (for AGSA data connection)
 
   Args:
     btsnoop_path: str, the path of the bt snoop log from Android.
@@ -47,10 +40,11 @@ def connection_time_dissector(btsnoop_path, packet_summary=False):
   # Will decode full packet detail
   cap = pyshark.FileCapture(input_file=btsnoop_path)
   # There are two possible way to start ACL
-  acl_inquery_event= BluetoothEventFactory.create_event('acl inquery')
+  acl_inquery_event = BluetoothEventFactory.create_event('acl inquery')
   acl_connect_event = BluetoothEventFactory.create_event('acl connect')
   a2dp_event = BluetoothEventFactory.create_event('a2dp')
   avrcp_event = BluetoothEventFactory.create_event('avrcp')
+  # TODO: make RFCOMM event more generic.
   rfcomm20_event = BluetoothEventFactory.create_event('rfcomm ch20')
   rfcomm21_event = BluetoothEventFactory.create_event('rfcomm ch21')
 
@@ -88,12 +82,19 @@ def connection_time_dissector(btsnoop_path, packet_summary=False):
     if hfp_event.is_finished:
       hfp_list.append(BluetoothEventFactory.create_event('hfp'))
 
+    # HFP for qualcomm
+    rfcomm_hfp_event = rfcomm_hfp_list[-1]
+    rfcomm_hfp_event.update(packet)
+    if rfcomm_hfp_event.is_finished:
+      rfcomm_hfp_list.append(BluetoothEventFactory.create_event('rfcomm hfp'))
+
     # Main events
     for event in event_list:
       event.update(packet)
       all_done = all_done and event.is_finished
     if all_done:
-      break
+      # break
+      pass
 
   print('Done at %d packet.' % i)
 

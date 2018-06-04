@@ -76,6 +76,20 @@ _BLUETOOTH_EVENT_FILTERS = {
                     ('btsdp', 'continuation_state', 'Continuation State: no (00)')],
     RELEVANT_FILTER: [('btsdp', None, None)],
     KEY_FIELDS: [('btsdp', 'service_search_pattern', 0)]
+  },
+  'avrcp capability': {
+    EVENT_NAME: 'Bluetooth AVRCP GetCapabilities',
+    START_FILTER: [('btavrcp', 'ctype', 0x1),
+                   ('btavrcp', 'capability', 0x03)],
+    FINISH_FILTER: [('btavrcp', 'ctype', 0xc),
+                    ('btavrcp', 'capability', 0x03)],
+    RELEVANT_FILTER: [('btavrcp', None, None)]
+  },
+  'rfcomm hfp': {
+    EVENT_NAME: 'Bluetooth HFP RFCOMM',
+    START_FILTER: [('btrfcomm', 'channel', 3)],
+    FINISH_FILTER: [('btrfcomm', 'len', 0)],
+    RELEVANT_FILTER: [('bthfp', None, None)]
   }
 }
 

@@ -19,14 +19,16 @@ _BLUETOOTH_EVENT_FILTERS = {
     START_FILTER: [('bthci_cmd', 'opcode', 0x405)],
     FINISH_FILTER: [('bthci_evt', 'code', 0x03),
                     ('bthci_evt', 'status', 0x00)],
-    RELEVANT_FILTER: None
+    RELEVANT_FILTER: None,
+    KEY_FIELDS: [('bthci_evt', 'connection_handle', KeyFieldSpec.PKT_LOCATION_FINISH)]
   },
   'acl connect': {
     EVENT_NAME: 'bluetooth acl connect',
     START_FILTER: [('bthci_evt', 'code', 0x04)],
     FINISH_FILTER: [('bthci_evt', 'code', 0x03),
                     ('bthci_evt', 'status', 0x00)],
-    RELEVANT_FILTER: None
+    RELEVANT_FILTER: None,
+    KEY_FIELDS: [('bthci_evt', 'connection_handle', KeyFieldSpec.PKT_LOCATION_FINISH)]
   },
   'a2dp': {
     EVENT_NAME: 'Bluetooth A2DP',

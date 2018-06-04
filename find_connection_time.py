@@ -28,7 +28,7 @@ def _calc_time_table_from_events(event_list):
 
 
 def main(btsnoop_path, print_summary=False):
-  event_list = connection_time_dissector(btsnoop_path, packet_summary=False)
+  event_list = connection_time_dissector(btsnoop_path)
   time_table = _calc_time_table_from_events(event_list)
   print('=== Connection Time Table ===')
   print('Event Name\tStart Time\tElapsed Time')

@@ -4,7 +4,7 @@ This version uses tshark and pyshark.
 """
 
 import argparse
-from bluetooth_parser import connection_time_dissector
+from bluetooth_parser import *
 
 
 def _calc_time_table_from_events(event_list):
@@ -28,16 +28,17 @@ def _calc_time_table_from_events(event_list):
 
 
 def main(btsnoop_path, print_summary=False):
-  event_list = connection_time_dissector(btsnoop_path)
-  time_table = _calc_time_table_from_events(event_list)
-  print('=== Connection Time Table ===')
-  print('Event Name\tStart Time\tElapsed Time')
-  for row in time_table:
-    print('%s\t%0.6f\t%0.6f' % row)
-
-  if print_summary:
-    for event in event_list:
-      event.print_summary()
+  connection_list = parse_connections(btsnoop_path)
+  for connection in connection_list:
+    print('=== Connection ===')
+    connection.print_summary()
+    print('Event Name\tStart Time\tElapsed Time')
+    time_table = _calc_time_table_from_events(connection.get_events())
+    for row in time_table:
+      print('%s\t%0.6f\t%0.6f' % row)
+    if print_summary:
+      for evt in connection.get_events():
+        evt.print_summary()
 
 
 if __name__ == '__main__':

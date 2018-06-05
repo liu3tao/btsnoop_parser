@@ -77,6 +77,10 @@ class PacketFilter(object):
         break
     return ret
 
+  @property
+  def is_empty(self):
+    return not self._criteria
+
 
 class ConnectivityEventBase(object):
   """A generic event state machine for tracking connectivity related events."""
@@ -134,6 +138,11 @@ class ConnectivityEventBase(object):
   def finish_time(self):
     return self._event_finish_time
 
+  @property
+  def key_field_values(self):
+    """Returns a list of keyfield values."""
+    return self._key_field_values
+
   def _add_relevant_packet(self, packet, is_start=False, is_finish=False):
     """Append relevant packets to local cache.
     Args:
@@ -157,7 +166,7 @@ class ConnectivityEventBase(object):
 
   def _move_to_next_state(self):
     if self._state == EventState.NOT_STARTED:
-      self._state = EventState.IN_PROGRESS
+        self._state = EventState.IN_PROGRESS
     elif self._state == EventState.IN_PROGRESS:
       self._state = EventState.FINISHED
 
@@ -180,8 +189,13 @@ class ConnectivityEventBase(object):
     if self._state == EventState.NOT_STARTED:
       if self._start_filter and self._start_filter.eval(packet):
         self._set_start_time(float(packet.sniff_timestamp))
-        self._add_relevant_packet(packet, is_start=True)
+        # Need to check if the event contains only one packet
+        finish = True if self._finish_filter.is_empty else False
+        self._add_relevant_packet(packet, is_start=True, is_finish=finish)
         self._move_to_next_state()
+        if finish:
+          self._set_finish_time(float(packet.sniff_timestamp))
+          self._move_to_next_state()
     elif self._state == EventState.IN_PROGRESS:
       if self._finish_filter and self._finish_filter.eval(packet):
         self._set_finish_time(float(packet.sniff_timestamp))

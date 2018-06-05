@@ -14,21 +14,45 @@ KEY_FIELDS = 'key_fields'
 # Value: dict of <event name>, <start filter>, <finish filter>, <relevant filter>
 # TODO(liuta): Better to move the data to a separate config file.
 _BLUETOOTH_EVENT_FILTERS = {
-  'acl inquery': {
-    EVENT_NAME: 'bluetooth acl inquery',
+  'acl create': {
+    EVENT_NAME: 'Bluetooth ACL Create Connection',
     START_FILTER: [('bthci_cmd', 'opcode', 0x405)],
     FINISH_FILTER: [('bthci_evt', 'code', 0x03),
                     ('bthci_evt', 'status', 0x00)],
     RELEVANT_FILTER: None,
-    KEY_FIELDS: [('bthci_evt', 'connection_handle', KeyFieldSpec.PKT_LOCATION_FINISH)]
+    KEY_FIELDS: [('bthci_evt', 'connection_handle', KeyFieldSpec.PKT_LOCATION_FINISH),
+                 ('bthci_evt', 'bd_addr', KeyFieldSpec.PKT_LOCATION_FINISH)]
   },
-  'acl connect': {
-    EVENT_NAME: 'bluetooth acl connect',
+  'acl request': {
+    EVENT_NAME: 'Bluetooth ACL Connect Request',
     START_FILTER: [('bthci_evt', 'code', 0x04)],
     FINISH_FILTER: [('bthci_evt', 'code', 0x03),
                     ('bthci_evt', 'status', 0x00)],
     RELEVANT_FILTER: None,
+    KEY_FIELDS: [('bthci_evt', 'connection_handle', KeyFieldSpec.PKT_LOCATION_FINISH),
+                 ('bthci_evt', 'bd_addr', KeyFieldSpec.PKT_LOCATION_FINISH)]
+  },
+  'acl disconnect': {
+    EVENT_NAME: 'Bluetooth ACL Disconnect',
+    START_FILTER: [('bthci_evt', 'code', 0x05),
+                   ('bthci_evt', 'status', 0x00)],
+    FINISH_FILTER: None,
+    RELEVANT_FILTER: None,
     KEY_FIELDS: [('bthci_evt', 'connection_handle', KeyFieldSpec.PKT_LOCATION_FINISH)]
+  },
+  'auth request': {
+    EVENT_NAME: 'Bluetooth Authentication Requested',
+    START_FILTER: [('bthci_cmd', 'opcode', 0x0411)],
+    FINISH_FILTER: [('bthci_evt', 'code', 0x06),
+                    ('bthci_evt', 'status', 0x00)],
+    RELEVANT_FILTER: [('bthci_evt', 'opcode', 0x0411)]
+  },
+  'link encrypt': {
+    EVENT_NAME: 'Bluetooth Set Connection Encryption',
+    START_FILTER: [('bthci_cmd', 'opcode', 0x0413)],
+    FINISH_FILTER: [('bthci_evt', 'code', 0x08),
+                    ('bthci_evt', 'status', 0x00)],
+    RELEVANT_FILTER: [('bthci_evt', 'opcode', 0x0413)]
   },
   'a2dp': {
     EVENT_NAME: 'Bluetooth A2DP',
@@ -47,7 +71,7 @@ _BLUETOOTH_EVENT_FILTERS = {
                  ('bthfp', 'bthfp.at_cmd', KeyFieldSpec.PKT_LOCATION_FINISH)]
   },
   'avrcp': {
-    EVENT_NAME: 'Bluetooth AVRCP',
+    EVENT_NAME: 'Bluetooth AVRCP Volume',
     START_FILTER: [('btavrcp', 'ctype', 0x3),
                    ('btavrcp', 'notification.event_id', 0x0d)],
     FINISH_FILTER: [('btavrcp', 'ctype', 0xf),

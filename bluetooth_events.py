@@ -54,6 +54,13 @@ _BLUETOOTH_EVENT_FILTERS = {
                     ('bthci_evt', 'status', 0x00)],
     RELEVANT_FILTER: [('bthci_evt', 'opcode', 0x0413)]
   },
+  'link key request': {
+    EVENT_NAME: 'Bluetooth Link Key Request',
+    START_FILTER: [('bthci_evt', 'code', 0x17)], # Link key request
+    FINISH_FILTER: [('bthci_evt', 'code', 0x08),
+                    ('bthci_evt', 'status', 0x00)],
+    RELEVANT_FILTER: [('bthci_evt', 'opcode', 0x040b)]
+  },
   'a2dp': {
     EVENT_NAME: 'Bluetooth A2DP',
     START_FILTER: [('btavdtp', 'message_type', 0x00),

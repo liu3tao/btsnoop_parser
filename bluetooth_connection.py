@@ -44,6 +44,23 @@ def get_connection_handle(packet):
   return handle
 
 
+def get_bd_addr(packet):
+  """Helper function to get bd_addr filed from HCI CMD/EVT packet.
+
+  Args:
+    packet: packet object from pyshark.
+  Returns:
+    bd_addr value (MAC string). If the packet doesn't have bd_addr or not is not
+    HCI CMD/EVT, will return None.
+  """
+  bd_addr = None
+  if 'bthci_evt' in packet:
+    bd_addr = packet['bthci_evt'].get('bd_addr')
+  elif 'bthci_cmd' in packet:
+    bd_addr = packet['bthci_cmd'].get('bd_addr')
+  return bd_addr
+
+
 class BluetoothConnectionError(Exception):
   pass
 
@@ -93,9 +110,12 @@ class BluetoothConnection(object):
       return False
     # check if the packet belongs to connection
     handle = get_connection_handle(packet)
-    # Now we check if the connection handle matches.
-    if handle is None or handle != self._connection_handle:
+    bd_addr = get_bd_addr(packet)
+    # Now we check if the connection handle or bd_addr matches.
+    if ((handle is None or handle != self._connection_handle) and
+        (bd_addr is None or bd_addr != self._bt_addr)):
       return False
+      #pass
     # We found a packet belongs to the connection, update the events
     for evt_type in self.event_lists:
       evt = self.event_lists[evt_type][-1]

@@ -22,6 +22,28 @@ def _convert_handle_to_int(handle_hex_str):
   return conn_handle
 
 
+def get_connection_handle(packet):
+  """Helper function to get connection handler from packet. Understand HCI CMD,
+  HCI EVT and HCI ACL packets.
+
+  Args:
+    packet: packet object from pyshark.
+  Returns:
+    int value of connection handler. If the packet doesn't have connection
+    handler or not understandable, will return None.
+  """
+  handle = handle_str = None
+  if 'bthci_acl' in packet:
+    handle_str = packet['bthci_acl'].get('chandle')
+  elif 'bthci_evt' in packet:
+    handle_str = packet['bthci_evt'].get('connection_handle')
+  elif 'bthci_cmd' in packet:
+    handle_str = packet['bthci_cmd'].get('connection_handle')
+  if handle_str:
+    handle = _convert_handle_to_int(handle_str)
+  return handle
+
+
 class BluetoothConnectionError(Exception):
   pass
 
@@ -70,15 +92,7 @@ class BluetoothConnection(object):
     if self.is_disconnected:
       return False
     # check if the packet belongs to connection
-    handle = handle_str = None
-    if 'bthci_acl' in packet:
-      handle_str = packet['bthci_acl'].get('chandle')
-    elif 'bthci_evt' in packet:
-      handle_str = packet['bthci_evt'].get('connection_handle')
-    elif 'bthci_cmd' in packet:
-      handle_str = packet['bthci_cmd'].get('connection_handle')
-    if handle_str:
-      handle = _convert_handle_to_int(handle_str)
+    handle = get_connection_handle(packet)
     # Now we check if the connection handle matches.
     if handle is None or handle != self._connection_handle:
       return False

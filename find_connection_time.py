@@ -22,20 +22,24 @@ def _calc_time_table_from_events(event_list):
     finish_delta = event.finish_time - start_time if event.finish_time else -1.0
     row = (name,
            start_delta,
-           finish_delta)
+           finish_delta,
+           event.start_time,
+           event.finish_time)
     time_table.append(row)
   return time_table
 
 
 def main(btsnoop_path, print_summary=False):
   connection_list = parse_connections(btsnoop_path)
+  i = 0
   for connection in connection_list:
-    print('=== Connection ===')
+    i += 1
+    print('\nConnection %d' % i)
     connection.print_summary()
-    print('Event Name\tStart Time\tElapsed Time')
+    print('Event Name\tDelta Start Time\tDelta Elapsed Time\tStart Time\tFinish Time')
     time_table = _calc_time_table_from_events(connection.get_events())
     for row in time_table:
-      print('%s\t%0.6f\t%0.6f' % row)
+      print('%s\t%0.6f\t%0.6f\t%0.6f\t%0.6f' % row)
     if print_summary:
       for evt in connection.get_events():
         evt.print_summary()

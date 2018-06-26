@@ -3,6 +3,7 @@
 This version uses tshark and pyshark.
 """
 
+import json
 import argparse
 from bluetooth_parser import *
 
@@ -29,20 +30,29 @@ def _calc_time_table_from_events(event_list):
   return time_table
 
 
-def main(btsnoop_path, print_summary=False):
+def main(btsnoop_path, print_summary=False, use_json=False):
   connection_list = parse_connections(btsnoop_path)
   i = 0
+  json_list = []
   for connection in connection_list:
     i += 1
-    print('\nConnection %d' % i)
-    connection.print_summary()
-    print('Event Name\tDelta Start Time\tDelta Elapsed Time\tStart Time\tFinish Time')
     time_table = _calc_time_table_from_events(connection.get_events())
-    for row in time_table:
-      print('%s\t%0.6f\t%0.6f\t%0.6f\t%0.6f' % row)
-    if print_summary:
-      for evt in connection.get_events():
-        evt.print_summary()
+    if use_json:
+      json_list.append({'bt_addr': connection.bt_addr,
+                        'time_table': time_table})
+    else:
+      print('\nConnection %d' % i)
+      connection.print_summary()
+      print('Event Name\tDelta Start Time\tDelta Elapsed Time\tStart Time\tFinish Time')
+      for row in time_table:
+        print('%s\t%0.6f\t%0.6f\t%0.6f\t%0.6f' % row)
+      if print_summary:
+        for evt in connection.get_events():
+          evt.print_summary()
+  if use_json:
+    print('\n=== START JSON ===')
+    print(json.dumps(json_list))
+    print('=== END JSON ===')
 
 
 if __name__ == '__main__':
@@ -50,6 +60,9 @@ if __name__ == '__main__':
   parser.add_argument('path', help='btsnoop_hci.log path')
   parser.add_argument('-v', '--verbose', help='verbosity output',
                       action='store_true')
+  parser.add_argument('-j', '--json_output',
+                      help='Output in JSON format. Verbose will be disabled.',
+                      action='store_true')
   args = parser.parse_args()
-  main(args.path, args.verbose)
+  main(args.path, args.verbose, args.json_output)
 

@@ -142,6 +142,10 @@ class BluetoothConnection(object):
     return all_events
 
   @property
+  def bt_addr(self):
+    return self._bt_addr
+
+  @property
   def is_disconnected(self):
     if self.acl_disconnect_event:
       return self.acl_disconnect_event.is_finished
